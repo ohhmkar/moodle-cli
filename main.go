@@ -7,12 +7,7 @@ import (
 )
 
 func main() {
-	events, err := upcomingDeadlines()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if _, err := tea.NewProgram(model{events: events}).Run(); err != nil {
+	if _, err := tea.NewProgram(model{loading: true}).Run(); err != nil {
 		log.Fatal(err)
 	}
 }
