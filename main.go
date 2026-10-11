@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 )
 
 func main() {
@@ -19,5 +20,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("deadlines: ", len(events))
+	for _, e := range events {
+		due := time.Unix(e.TimeSort, 0)
+		fmt.Printf("%-30s %-20s %s\n", e.Name, e.Course.Shortname, due.Format("Mon 02 Jan 15:04"))
+	}
 }

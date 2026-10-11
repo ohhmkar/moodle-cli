@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"time"
 )
@@ -35,6 +36,9 @@ type eventsResponse struct {
 }
 
 const baseURL = "https://moodle.spit.ac.in/webservice/rest/server.php"
+const myBatch = "A4"
+
+var batchRe = regexp.MustCompile(`(?:^|-)([A-D][1-4])(?:-|W)`)
 
 func call(fn string, params url.Values, out any) error {
 	if params == nil {
@@ -81,5 +85,19 @@ func upcomingDeadlines() ([]Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	return r.Events, nil
+	var mine []Event
+	for _, e := range r.Events {
+		if isMine(e.Name) {
+			mine = append(mine, e)
+		}
+	}
+	return mine, nil
+}
+
+func isMine(name string) bool {
+	m := batchRe.FindStringSubmatch(name)
+	if m == nil {
+		return true
+	}
+	return m[1] == myBatch
 }
