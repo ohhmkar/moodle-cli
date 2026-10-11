@@ -2,14 +2,36 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
+	"time"
 )
 
 type SiteInfo struct {
 	Fullname string `json:"fullname"`
 	UserID   int    `json:"userid"`
+}
+
+type Course struct {
+	ID        int
+	Fullname  string
+	Shortname string
+}
+
+type Event struct {
+	Name     string
+	TimeSort int64
+	URL      string
+	Overdue  bool
+	Course   Course
+}
+
+type eventsResponse struct {
+	Events []Event `json:"events"`
 }
 
 const baseURL = "https://moodle.spit.ac.in/webservice/rest/server.php"
@@ -31,5 +53,33 @@ func call(fn string, params url.Values, out any) error {
 
 	defer resp.Body.Close()
 
-	return json.NewDecoder(resp.Body).Decode(out)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var mErr struct {
+		Exception string `json:"exception"`
+		Message   string `json:"message"`
+	}
+
+	// error ignored : array responses wont match
+	json.Unmarshal(body, &mErr)
+	if mErr.Exception != "" {
+		return fmt.Errorf("moodle: %s", mErr.Message)
+	}
+	return json.Unmarshal(body, out)
+}
+
+func upcomingDeadlines() ([]Event, error) {
+	params := url.Values{}
+	params.Set("timesortfrom", strconv.FormatInt(time.Now().Unix(), 10))
+	params.Set("limitnum", "50")
+
+	var r eventsResponse
+	err := call("core_calendar_get_action_events_by_timesort", params, &r)
+	if err != nil {
+		return nil, err
+	}
+	return r.Events, nil
 }

@@ -14,4 +14,10 @@ func main() {
 	}
 
 	fmt.Println("Hello", info.Fullname)
+
+	events, err := upcomingDeadlines()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("deadlines: ", len(events))
 }
