@@ -10,9 +10,13 @@ import (
 )
 
 var (
-	urgentStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff5f87")) // red for abhi karle bhai
-	soonStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("#ffd75f")) // yellow for kinda close
-	laterStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("#5fd787")) // green for time hai bohot
+	urgentStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff5f87")) // red for abhi karle bhai
+	soonStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#ffd75f")) // yellow for kinda close
+	laterStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#5fd787")) // green for time hai bohot
+	titleStyle    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#ffffff")).Background(lipgloss.Color("#7d56f4")).Padding(0, 1)
+	selectedStyle = lipgloss.NewStyle().Background(lipgloss.Color("#3a3a5a")).Bold(true)
+	boxStyle      = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(1, 2)
+	helpStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#6c6c6c"))
 )
 
 type model struct {
@@ -45,7 +49,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	var b strings.Builder
-	b.WriteString("Your deadlines\n\n")
+	b.WriteString(titleStyle.Render("Omkar's SPIT Moodle TUI"))
+	b.WriteString("\n\n")
 
 	for i, e := range m.events {
 		prefix := "  "
@@ -54,9 +59,15 @@ func (m model) View() tea.View {
 		}
 		due := time.Unix(e.TimeSort, 0)
 		left := time.Until(due)
-		fmt.Fprintf(&b, "%s%-30s%-30s %s\n", prefix, e.Name, e.Course.Shortname, urgencyStyle(left).Render(humanize(left)))
+		row := fmt.Sprintf("%s%-30s %-32s %-17s", prefix, e.Name, e.Course.Shortname, due.Format("Mon 02 Jan 15:04"))
+		if i == m.cursor {
+			row = selectedStyle.Render(row)
+		}
+		// countdown added after the highlight so the two styles don't clash
+		fmt.Fprintf(&b, "%s %s\n", row, urgencyStyle(left).Render(humanize(left)))
 	}
 
-	b.WriteString("\n↑/↓ move . q quit\n")
-	return tea.NewView(b.String())
+	b.WriteString("\n")
+	b.WriteString(helpStyle.Render("↑/↓ move • q quit"))
+	return tea.NewView(boxStyle.Render(b.String()))
 }
