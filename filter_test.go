@@ -3,6 +3,7 @@ package main
 import "testing"
 
 func TestIsMine(t *testing.T) {
+	t.Setenv("MYBATCH", "A4")
 	cases := []struct {
 		name string
 		want bool

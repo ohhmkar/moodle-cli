@@ -36,7 +36,6 @@ type eventsResponse struct {
 }
 
 const baseURL = "https://moodle.spit.ac.in/webservice/rest/server.php"
-const myBatch = "A4"
 
 var batchRe = regexp.MustCompile(`(?:^|-)([A-D][1-4])(?:-|W)`)
 
@@ -99,5 +98,5 @@ func isMine(name string) bool {
 	if m == nil {
 		return true
 	}
-	return m[1] == myBatch
+	return m[1] == os.Getenv("MYBATCH")
 }
