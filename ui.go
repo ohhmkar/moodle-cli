@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -53,6 +54,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.cursor < len(m.events)-1 {
 				m.cursor++
 			}
+			return m, nil
+		case "enter", "o":
+			if m.events == nil {
+				return m, nil
+			}
+			url := m.events[m.cursor].URL
+			exec.Command("open", url).Start()
 			return m, nil
 		}
 	case deadlineMsg:

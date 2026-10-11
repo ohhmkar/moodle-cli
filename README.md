@@ -2,6 +2,8 @@
 
 This is a tool for S.P.I.T students to use `moodle.spit.ac.in` in the terminal. Its really frustating to use that site and to miss out on a deadline because its lost in the 100s of other batch assignments. This tool gets you assignments relevant only to you.
 
+![Demo: the deadline list with colored countdowns, moving the cursor up and down](assets/demo.gif)
+
 ## What it does
 
 - Fetches your upcoming deadlines from Moodle (the same list as the dashboard Timeline)
