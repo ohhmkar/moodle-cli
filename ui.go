@@ -6,6 +6,13 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
+)
+
+var (
+	urgentStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff5f87")) // red for abhi karle bhai
+	soonStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("#ffd75f")) // yellow for kinda close
+	laterStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("#5fd787")) // green for time hai bohot
 )
 
 type model struct {
@@ -46,7 +53,8 @@ func (m model) View() tea.View {
 			prefix = "> "
 		}
 		due := time.Unix(e.TimeSort, 0)
-		fmt.Fprintf(&b, "%s%-30s%-30s %s\n", prefix, e.Name, e.Course.Shortname, humanize(time.Until(due)))
+		left := time.Until(due)
+		fmt.Fprintf(&b, "%s%-30s%-30s %s\n", prefix, e.Name, e.Course.Shortname, urgencyStyle(left).Render(humanize(left)))
 	}
 
 	b.WriteString("\n↑/↓ move . q quit\n")

@@ -37,7 +37,7 @@ type eventsResponse struct {
 
 const baseURL = "https://moodle.spit.ac.in/webservice/rest/server.php"
 
-var batchRe = regexp.MustCompile(`(?:^|-)([A-D][1-4])(?:-|W)`)
+var batchRe = regexp.MustCompile(`(?:^|-)\s*([A-D][1-4])\s*(?:-|W)`)
 
 func call(fn string, params url.Values, out any) error {
 	if params == nil {
