@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
+	"runtime"
 	"time"
 
 	"charm.land/lipgloss/v2"
@@ -29,4 +31,17 @@ func urgencyStyle(d time.Duration) lipgloss.Style {
 	} else {
 		return laterStyle
 	}
+}
+
+func openURL(url string) error {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "darwin":
+		cmd = exec.Command("open", url)
+	case "windows":
+		cmd = exec.Command("rundll32", "url.dll,FileprotocolHandler", url)
+	default:
+		cmd = exec.Command("xdg-open", url)
+	}
+	return cmd.Start()
 }
