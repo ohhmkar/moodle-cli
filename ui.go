@@ -82,6 +82,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() tea.View {
 	var b strings.Builder
 	b.WriteString(titleStyle.Render("Omkar's SPIT Moodle TUI"))
+	b.WriteString("\n\n")
 	labels := []string{"Upcoming", "Overdue"}
 	for i, l := range labels {
 		if i == m.tab {
@@ -113,7 +114,7 @@ func (m model) View() tea.View {
 		}
 		due := time.Unix(e.TimeSort, 0)
 		left := time.Until(due)
-		row := fmt.Sprintf("%s%-30s %-32s %-17s", prefix, e.Name, e.Course.Shortname, due.Format("Mon 02 Jan 15:04"))
+		row := fmt.Sprintf("%s%-30s %-32s %-17s", prefix, truncate(e.Name, 30), truncate(e.Course.Shortname, 32), due.Format("Mon 02 Jan 15:04"))
 		if i == m.cursor {
 			row = selectedStyle.Render(row)
 		}

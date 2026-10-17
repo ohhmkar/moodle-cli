@@ -55,3 +55,11 @@ func (m model) visible() []Event {
 	}
 	return out
 }
+
+func truncate(s string, n int) string {
+	runes := []rune(s)
+	if len(runes) <= n {
+		return s
+	}
+	return string(runes[:n-3]) + "..."
+}
