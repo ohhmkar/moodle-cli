@@ -66,11 +66,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "tab", "t":
 			m.tab = 1 - m.tab
 			m.cursor = 0
+		case "r":
+			m.loading = true
+			return m, m.Init()
 		}
 	case deadlineMsg:
 		m.loading = false
 		m.events = msg.events
 		m.err = msg.err
+		m.cursor = 0
 	}
 	return m, nil
 }
@@ -118,6 +122,6 @@ func (m model) View() tea.View {
 	}
 
 	b.WriteString("\n")
-	b.WriteString(helpStyle.Render("↑/↓ move • q quit • <enter> open • <tab>|t tab"))
+	b.WriteString(helpStyle.Render("↑/↓ move • q quit • <enter> open • <tab>|t tab • r refresh"))
 	return tea.NewView(boxStyle.Render(b.String()))
 }
