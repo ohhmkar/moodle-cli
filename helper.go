@@ -45,3 +45,13 @@ func openURL(url string) error {
 	}
 	return cmd.Start()
 }
+
+func (m model) visible() []Event {
+	var out []Event
+	for _, e := range m.events {
+		if e.Overdue == (m.tab == 1) {
+			out = append(out, e)
+		}
+	}
+	return out
+}

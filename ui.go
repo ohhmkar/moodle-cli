@@ -21,6 +21,7 @@ var (
 
 type model struct {
 	events  []Event
+	tab     int // 0 = upcoming 1 = overdue
 	cursor  int //which row is selected
 	loading bool
 	err     error
@@ -50,17 +51,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 		case "down", "j":
-			if m.cursor < len(m.events)-1 {
+			if m.cursor < len(m.visible())-1 {
 				m.cursor++
 			}
 			return m, nil
 		case "enter", "o":
-			if m.events == nil {
+			v := m.visible()
+			if len(v) == 0 {
 				return m, nil
 			}
-			url := m.events[m.cursor].URL
+			url := v[m.cursor].URL
 			openURL(url)
 			return m, nil
+		case "tab", "t":
+			m.tab = 1 - m.tab
+			m.cursor = 0
 		}
 	case deadlineMsg:
 		m.loading = false
@@ -73,6 +78,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() tea.View {
 	var b strings.Builder
 	b.WriteString(titleStyle.Render("Omkar's SPIT Moodle TUI"))
+	labels := []string{"Upcoming", "Overdue"}
+	for i, l := range labels {
+		if i == m.tab {
+			b.WriteString(selectedStyle.Render(" " + l + " "))
+		} else {
+			b.WriteString(helpStyle.Render(" " + l + " "))
+		}
+	}
 	b.WriteString("\n\n")
 
 	if m.loading {
@@ -84,7 +97,12 @@ func (m model) View() tea.View {
 		return tea.NewView(boxStyle.Render(b.String()))
 	}
 
-	for i, e := range m.events {
+	if len(m.visible()) == 0 {
+		b.WriteString("nothing here!")
+		return tea.NewView(boxStyle.Render(b.String()))
+	}
+
+	for i, e := range m.visible() {
 		prefix := "  "
 		if i == m.cursor {
 			prefix = "> "
@@ -100,6 +118,6 @@ func (m model) View() tea.View {
 	}
 
 	b.WriteString("\n")
-	b.WriteString(helpStyle.Render("↑/↓ move • q quit"))
+	b.WriteString(helpStyle.Render("↑/↓ move • q quit • <enter> open • <tab>|t tab"))
 	return tea.NewView(boxStyle.Render(b.String()))
 }

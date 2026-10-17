@@ -33,11 +33,12 @@ type Event struct {
 
 type eventsResponse struct {
 	Events []Event `json:"events"`
+	LastId int     `json:"lastid"`
 }
 
 const baseURL = "https://moodle.spit.ac.in/webservice/rest/server.php"
 
-var batchRe = regexp.MustCompile(`(?:^|-)\s*([A-D][1-9])\s*(?:-|W)`)
+var batchRe = regexp.MustCompile(`(?:^|[-\s\d])([A-D][1-9])(?:[-WT\s]|$)`)
 
 func call(fn string, params url.Values, out any) error {
 	if params == nil {
@@ -76,19 +77,25 @@ func call(fn string, params url.Values, out any) error {
 
 func upcomingDeadlines() ([]Event, error) {
 	params := url.Values{}
-	params.Set("timesortfrom", strconv.FormatInt(time.Now().Unix(), 10))
+	// look back 14 days so overdue (unsubmitted) assignments still show up
+	params.Set("timesortfrom", strconv.FormatInt(time.Now().AddDate(0, 0, -14).Unix(), 10))
 	params.Set("limitnum", "50")
-
-	var r eventsResponse
-	err := call("core_calendar_get_action_events_by_timesort", params, &r)
-	if err != nil {
-		return nil, err
-	}
 	var mine []Event
-	for _, e := range r.Events {
-		if isMine(e.Name) {
-			mine = append(mine, e)
+	for {
+		var r eventsResponse
+		err := call("core_calendar_get_action_events_by_timesort", params, &r)
+		if err != nil {
+			return nil, err
 		}
+		for _, e := range r.Events {
+			if isMine(e.Name) {
+				mine = append(mine, e)
+			}
+		}
+		if len(r.Events) < 50 {
+			break
+		}
+		params.Set("aftereventid", strconv.Itoa(r.LastId)) // bookmark for next page
 	}
 	return mine, nil
 }
