@@ -45,7 +45,10 @@ func call(fn string, params url.Values, out any) error {
 		params = url.Values{}
 	}
 
-	moodleToken := os.Getenv("MOODLE_TOKEN")
+	moodleToken, err := loadToken()
+	if err != nil {
+		return err
+	}
 	params.Set("wstoken", moodleToken)
 	params.Set("wsfunction", fn)
 	params.Set("moodlewsrestformat", "json")
